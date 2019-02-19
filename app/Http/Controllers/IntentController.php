@@ -15,13 +15,13 @@ class IntentController extends Controller
 {
     public function processIntent(Request $request)
     {
-    	$request_id = $request->input('request.requestId');
+    	// If it's a `LaunchRequest` set the name to `LaunchRequest` else, pull the intent name from the request data
     	$intent_name = $request->input('request.type') === 'LaunchRequest' ? 'LaunchRequest' : $request->input('request.intent.name');
-    	file_put_contents(storage_path() . '/json.json', json_encode($request, JSON_PRETTY_PRINT));
 
     	switch($intent_name)
     	{
     		case 'LaunchRequest':
+    			// Saying "Alexa, open twilio assistant" will trigger this
 		    	return response()->json([
 		    		'version' => '1.0',
 		    		'response' => [
@@ -29,13 +29,16 @@ class IntentController extends Controller
 			    			'type' => 'PlainText',
 			    			'text' => 'Welcome to the Twilio Alexa assistant. Try saying send a voice message to start.',
 			    		],
+			    		// We want to start a session so our intents will work
 			    		'shouldEndSession' => false,
 			    	],
 		    	]);
     		break;
     		case 'SelectIntent':
+    			// we pull the phone number from the slot alexa sends us
     			$phone_number = $request->input('request.intent.slots.PHONE.value');
 
+    			// return the phone number in the session data & ask what message to send, this will trigger the MessageIntent
 		    	return response()->json([
 		    		'version' => '1.0',
 		    		'response' => [
@@ -45,6 +48,7 @@ class IntentController extends Controller
 			    		],
 			    		'shouldEndSession' => false,
 			    	],
+			    	// Alexa stores session data and sends it with each request, typical sessions will not work
 		    		'sessionAttributes' => [
 		    			'phoneNumber' => $phone_number,
 		    		],
@@ -62,6 +66,7 @@ class IntentController extends Controller
     			// message
     			$message = $request->input('request.intent.slots.MESSAGE.value');
 
+    			// Create the Twilio call and route it to our callback
 	   			$client = new Client($account_sid, $auth_token);
 				$call = $client->account->calls->create(  
 				    $to_number,
@@ -74,6 +79,7 @@ class IntentController extends Controller
 				// now cache the call sid and message
 				Cache::put($call->sid, $message, 5);
 
+				// Let the user know the call was successful
 		    	return response()->json([
 		    		'version' => '1.0',
 		    		'response' => [
@@ -93,13 +99,16 @@ class IntentController extends Controller
     	// get twilio call sid
     	$id = $_REQUEST['CallSid'];
 
+    	// fetch message from cache
     	$message = Cache::get($id);
 
+    	// generate twiml with response
     	$twiml = new Twiml();
     	$twiml->say($message, [
     		'voice' => 'alice',
     	]);
 
+    	// return twiml
 	    $response = Response::make($twiml, 200);
 	    $response->header('Content-Type', 'text/xml');
 	    return $response;
