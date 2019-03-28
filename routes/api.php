@@ -13,6 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::post('/alexa/intent', 'IntentController@processIntent');
-
-Route::post('/twilio/callback', 'IntentController@processCall')->name('twilio.callback');
+Route::middleware('auth:api')->get('/user', function (Request $request) {
+    return $request->user();
+});
