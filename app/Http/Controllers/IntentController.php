@@ -87,7 +87,7 @@ class IntentController extends Controller
 			    			'type' => 'PlainText',
 			    			'text' => 'Sending ' . $message . ' to ' . $to_number,
 			    		],
-			    		'shouldEndSession' => true,
+			    		'shouldEndSession' => false,
 			    	],
 		    	]);
 			break;
