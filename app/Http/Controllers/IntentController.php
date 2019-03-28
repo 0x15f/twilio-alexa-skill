@@ -27,7 +27,7 @@ class IntentController extends Controller
 		    		'response' => [
 			    		'outputSpeech' => [
 			    			'type' => 'PlainText',
-			    			'text' => 'Welcome to the Twilio Alexa assistant. Try saying send a voice message to start.',
+			    			'text' => 'Welcome to the Twilio Alexa assistant.',
 			    		],
 			    		// We want to start a session so our intents will work
 			    		'shouldEndSession' => false,
