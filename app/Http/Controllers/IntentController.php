@@ -36,7 +36,7 @@ class IntentController extends Controller
     		break;
     		case 'SelectIntent':
     			// we pull the phone number from the slot alexa sends us
-    			$phone_number = $request->input('request.intent.slots.PHONE.value');
+    			$phone_number = '+' . $request->input('request.intent.slots.PHONE.value');
 
     			// return the phone number in the session data & ask what message to send, this will trigger the MessageIntent
 		    	return response()->json([
